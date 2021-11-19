@@ -49,8 +49,8 @@ async function run() {
 
         // add a review (Post api insert one)
         app.post('/addReview', async (req, res) => {
-            const service = req.body;
-            const result = await reviewsCollection.insertOne(service);
+            const review = req.body;
+            const result = await reviewsCollection.insertOne(review);
             res.json(result)
         })
 
@@ -139,8 +139,6 @@ async function run() {
             const result = await orderCollection.updateOne(filter, updateDoc, options)
             res.json(result)
         })
-
-
 
     }
     finally {
