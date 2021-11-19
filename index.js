@@ -29,7 +29,6 @@ async function run() {
         app.post('/products', async (req, res) => {
             const product = req.body;
             const result = await productsCollection.insertOne(product);
-            console.log(result)
             res.json(result)
         })
 
@@ -58,7 +57,6 @@ async function run() {
         app.post('/users', async (req, res) => {
             const user = req.body
             const result = await usersCollection.insertOne(user)
-            console.log(result)
             res.json(result)
         })
 
@@ -86,7 +84,6 @@ async function run() {
             const order = req.body;
             console.log(order)
             const result = await orderCollection.insertOne(order);
-            console.log(result)
             res.json(result)
         })
 
@@ -112,7 +109,6 @@ async function run() {
         app.delete('/deleteProduct/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: id }
-            console.log(query)
             const result = await orderCollection.deleteOne(query)
             res.json(result)
         })
@@ -121,7 +117,6 @@ async function run() {
         // get all orders in order management section
         app.get('/allOrders', async (req, res) => {
             const result = await orderCollection.find({}).toArray();
-            console.log('this is all order', result)
             res.send(result)
         })
 
