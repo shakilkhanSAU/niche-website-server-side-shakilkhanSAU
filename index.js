@@ -82,7 +82,6 @@ async function run() {
         // book a new product
         app.post('/addOrder', async (req, res) => {
             const order = req.body;
-            console.log(order)
             const result = await orderCollection.insertOne(order);
             res.json(result)
         })
@@ -107,6 +106,14 @@ async function run() {
 
         // delete an order 
         app.delete('/deleteProduct/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: id }
+            const result = await orderCollection.deleteOne(query)
+            res.json(result)
+        })
+
+        // cancelOrder
+        app.delete('/cancelOrder/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: id }
             const result = await orderCollection.deleteOne(query)
