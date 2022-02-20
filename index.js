@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const ObjectId = require('mongodb').ObjectId;
+
 const { MongoClient } = require('mongodb');
 require('dotenv').config()
 const app = express()
@@ -13,6 +14,9 @@ app.use(express.json())
 // connection uri
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.yw3x3.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+
+// stripe secret
+const stripe = require('stripe')(process.env.STRIPE_SECRET);
 
 // run funtion
 async function run() {
@@ -86,9 +90,33 @@ async function run() {
             res.json(result)
         })
 
+        // update payment status
+        app.put('/payment/:id', async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: id }
+            const updateDocs = {
+                $set: {
+                    payment: payment
+                }
+            }
+            const result = await orderCollection.updateOne(filter, updateDocs)
+            res.json(result)
+        })
+
         // get my orders 
         app.get('/myOrders/:email', async (req, res) => {
             const result = await orderCollection.find({ email: req.params.email }).toArray();
+            res.json(result)
+        })
+
+        // get order for payment
+        app.get('/payment/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: id }
+            console.log(query)
+            const result = await orderCollection.findOne(query);
+            console.log(result)
             res.json(result)
         })
 
@@ -96,6 +124,7 @@ async function run() {
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
+            console.log(query)
             const user = await usersCollection.findOne(query);
             let isAdmin = false;
             if (user?.role === 'admin') {
@@ -142,6 +171,22 @@ async function run() {
             res.json(result)
         })
 
+        // stripe payment integation
+        app.post('/create-payment-intent', async (req, res) => {
+            const paymentInfo = req.body;
+            console.log(paymentInfo)
+            const amount = paymentInfo.price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: "usd",
+                automatic_payment_methods: {
+                    enabled: true,
+                },
+            });
+            res.json({
+                clientSecret: paymentIntent.client_secret,
+            });
+        })
     }
     finally {
         // await client.close()
